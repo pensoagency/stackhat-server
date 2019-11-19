@@ -45,8 +45,8 @@ public class Databases {
     @Produces(MediaType.APPLICATION_JSON)
     public Response postIt(final DatabaseRequest request) {
 
-        String path = "C:\\Users\\myxll\\Desktop\\test\\tmp.xlsx";
-        String pathDatabase = "C:\\Users\\myxll\\Desktop\\test\\database.xlsx";
+        String path = "./tmp.xlsx";
+        String pathDatabase = "./database.xlsx";
 
         String APIKey = "c8fb6490-26a8-46bd-88a9-ac26d7994656"; // API
 
@@ -59,7 +59,7 @@ public class Databases {
                 @Override
                 public void write(java.io.OutputStream output) throws IOException, WebApplicationException {
                     try {
-                        String path = "C:\\Users\\myxll\\Desktop\\test\\tmp.xlsx";
+                        String path = "./tmp.xlsx";
 
                         java.nio.file.Path filePath = Paths.get(path);
                         byte[] data = Files.readAllBytes(filePath);
