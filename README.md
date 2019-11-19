@@ -24,3 +24,13 @@ To build / run tests
 To run local server
 
 `mvn exec:java`
+
+## Application Hosting
+
+The application is currently hosted on a Bitnami Tomcat Ubuntu image on AWS.
+
+https://stackhat.pensoagency.com/
+
+Configuring via the Bitnami help tool:
+
+`sudo /opt/bitnami/bnhelper-tool`
