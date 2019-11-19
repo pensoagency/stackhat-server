@@ -1,4 +1,4 @@
-package penso;
+penso.stackhat.builtwith;
 
 import java.io.File;
 import java.io.FileInputStream;
