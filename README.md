@@ -4,6 +4,14 @@
 
 BuiltWith API connector implementation that compiles data into Excel sheets.
 
+To build / install
+
+`mvn clean install`
+
+With full deps
+
+`mvn clean compile assembly:single`
+
 ## StackhatServer
 
 Maven based jersey.github.io JAX-RS REST API implementation.
