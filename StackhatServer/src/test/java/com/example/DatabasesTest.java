@@ -1,4 +1,4 @@
-// package penso.penso.stackhat;
+// package penso.penso.stackhat.server;
 
 // import javax.ws.rs.client.Client;
 // import javax.ws.rs.client.ClientBuilder;

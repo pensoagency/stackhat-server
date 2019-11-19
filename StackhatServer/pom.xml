@@ -3,7 +3,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>penso.stackhat</groupId>
+    <groupId>penso.stackhat.server</groupId>
     <artifactId>StackhatServer</artifactId>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
@@ -43,6 +43,11 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-grizzly2-http</artifactId>
+        </dependency>         -->
     </dependencies>
 
     <build>
@@ -69,7 +74,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>penso.stackhat.Main</mainClass>
+                    <mainClass>penso.stackhat.server.Main</mainClass>
                 </configuration>
             </plugin>
         </plugins>
