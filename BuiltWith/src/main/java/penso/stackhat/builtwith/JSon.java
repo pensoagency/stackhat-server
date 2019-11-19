@@ -1,4 +1,4 @@
-penso.stackhat.builtwith;
+package penso.stackhat.builtwith;
 
 import java.io.BufferedReader;
 import java.io.IOException;
