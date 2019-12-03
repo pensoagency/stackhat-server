@@ -191,7 +191,10 @@ public class Database {
 
 			// has category changed?
 			if (currentCategory != null && currentCategory.Title != categoryTitle) {
-				// yes -> add existing to list
+				// yes -> add current name to this cat
+				currentCategory.Names.add(currentName);
+				currentName = null;
+				// add existing to list
 				categories.add(currentCategory);
 				// set null to trigger new item
 				currentCategory = null;
@@ -236,6 +239,12 @@ public class Database {
 			// add to current name
 			currentName.Technologies.add(technologyName);
 
+		}
+
+		// add final category + name
+		if (!currentCategory.equals(null)) {
+			currentCategory.Names.add(currentName);
+			categories.add(currentCategory);
 		}
 
 		wb.close();
