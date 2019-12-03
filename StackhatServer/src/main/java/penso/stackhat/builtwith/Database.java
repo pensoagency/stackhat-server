@@ -14,6 +14,9 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 //import org.junit.Test;
 
+import penso.stackhat.builtwith.models.Category;
+import penso.stackhat.builtwith.models.Name;
+
 public class Database {
 
 	/**
@@ -162,4 +165,81 @@ public class Database {
 		in.close();
 		return categories;
 	}
+
+	public ArrayList<Category> getAllCategoriesDetail(String path) throws IOException{
+		File file = new File(path);
+		FileInputStream in = new FileInputStream(file);
+		XSSFWorkbook wb = new XSSFWorkbook(in);
+		XSSFSheet sheet = wb.getSheet("DATABASE");
+		
+		ArrayList<Category> categories = new ArrayList<Category>();
+		int lastRow= sheet.getLastRowNum();
+
+		Category currentCategory = null;
+		Name currentName = null;
+		for(int i=2;i<=lastRow;i++) {
+			// get the row
+			Row row = sheet.getRow(i);
+
+			///////////////////////////////////
+			// category
+			///////////////////////////////////
+
+			// get category name	
+			Cell cell = row.getCell(1);
+			String categoryTitle = cell.getStringCellValue();			
+
+			// has category changed?
+			if (currentCategory != null && currentCategory.Title != categoryTitle) {
+				// yes -> add existing to list
+				categories.add(currentCategory);
+				// set null to trigger new item
+				currentCategory = null;
+			}
+
+			if (currentCategory == null) {
+				// create new category and set title
+				currentCategory = new Category();
+				currentCategory.setTitle(categoryTitle);				
+			}
+
+			///////////////////////////////////
+			// name
+			///////////////////////////////////
+
+			// get name	
+			cell = row.getCell(2);
+			String nameTitle = cell.getStringCellValue();
+
+			// has name changed?
+			if (currentName != null && currentName.Title != nameTitle) {
+				// yes -> add existing to list
+				currentCategory.Names.add(currentName);
+				// set null to trigger new item
+				currentName = null;
+			}			
+
+			if (currentName == null) {
+				// create new category and set title
+				currentName = new Name();
+				currentName.setTitle(nameTitle);				
+			}
+
+			///////////////////////////////////
+			// technology
+			///////////////////////////////////			
+
+			// get technology	
+			cell = row.getCell(3);
+			String technologyName = cell.getStringCellValue();
+
+			// add to current name
+			currentName.Technologies.add(technologyName);
+
+		}
+
+		wb.close();
+		in.close();
+		return categories;
+	}	
 }

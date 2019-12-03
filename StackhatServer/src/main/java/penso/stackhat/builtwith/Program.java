@@ -8,6 +8,9 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class Program {
+	public static String pathDatabase = "./database.xlsx";
+	public static String APIKey = "c8fb6490-26a8-46bd-88a9-ac26d7994656";
+
 	public void start(String[] args, String path, String pathDatabase, String APIKey)
 			throws IOException, InvalidFormatException {
 		long start = System.currentTimeMillis();

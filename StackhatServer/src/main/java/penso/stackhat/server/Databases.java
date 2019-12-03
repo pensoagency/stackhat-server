@@ -46,9 +46,9 @@ public class Databases {
     public Response postIt(final DatabaseRequest request) {
 
         String path = "./tmp.xlsx";
-        String pathDatabase = "./database.xlsx";
+        String pathDatabase = Program.pathDatabase;
 
-        String APIKey = "c8fb6490-26a8-46bd-88a9-ac26d7994656"; // API
+        String APIKey = Program.APIKey; // API
 
         try {
             Program program = new Program();
