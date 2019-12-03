@@ -47,8 +47,9 @@ public class Authentication {
     private void authenticate(String username, String password) throws Exception {
         // Authenticate against a database, LDAP, file or whatever
         // Throw an Exception if the credentials are invalid
-        if (!(username == "penso" && password == "p3n5oagrader!"))
+        if (!username.equals("penso") || !password.equals("p3n5oagrader!")) {
             throw new Exception("Invalid username and or password");
+        }
 
     }
 
