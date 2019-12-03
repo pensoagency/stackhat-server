@@ -1,4 +1,4 @@
-package penso.stackhat.server;
+package penso.stackhat.server.rest;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,12 +17,13 @@ import javax.ws.rs.core.StreamingOutput;
 
 import penso.stackhat.builtwith.*;
 import penso.stackhat.builtwith.models.*;
-import penso.stackhat.server.DatabaseRequest;;
+import penso.stackhat.server.filter.JWTTokenNeeded;
+import penso.stackhat.server.rest.DatabaseRequest;
 
 /**
  * Root resource (exposed at "databases" path)
  */
-@Path("technologies")
+@Path("/technologies")
 public class Technologies {
     /**
      * Method handling HTTP POST requests. The returned object will be sent to the
@@ -33,6 +34,7 @@ public class Technologies {
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
+    @JWTTokenNeeded
     public Response postIt(final String category) {
 
         return Response.ok()

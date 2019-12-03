@@ -1,4 +1,4 @@
-package penso.stackhat.server;
+package penso.stackhat.server.rest;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,12 +15,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import penso.stackhat.builtwith.*;
-import penso.stackhat.server.DatabaseRequest;;
+import penso.stackhat.server.filter.JWTTokenNeeded;
+import penso.stackhat.server.rest.DatabaseRequest;
 
 /**
  * Root resource (exposed at "databases" path)
  */
-@Path("databases")
+@Path("/databases")
 public class Databases {
     /**
      * Method handling HTTP GET requests. The returned object will be sent to the
@@ -30,6 +31,7 @@ public class Databases {
      */
     @GET
     @Produces(MediaType.TEXT_PLAIN)
+    @JWTTokenNeeded
     public String getIt() {
         return "Hello World!";
     }
@@ -43,6 +45,7 @@ public class Databases {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @JWTTokenNeeded
     public Response postIt(final DatabaseRequest request) {
 
         String path = "./tmp.xlsx";

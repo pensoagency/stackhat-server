@@ -1,4 +1,4 @@
-package penso.stackhat.server;
+package penso.stackhat.server.filter;
 
 import java.io.IOException;
 import javax.ws.rs.container.ContainerRequestContext;

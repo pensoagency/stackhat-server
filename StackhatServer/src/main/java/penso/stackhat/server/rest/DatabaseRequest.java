@@ -1,4 +1,4 @@
-package penso.stackhat.server;
+package penso.stackhat.server.rest;
 
 public class DatabaseRequest {
     String[] urls = new String[0];
