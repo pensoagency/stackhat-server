@@ -18,7 +18,6 @@ import javax.ws.rs.core.StreamingOutput;
 import penso.stackhat.builtwith.*;
 import penso.stackhat.builtwith.models.*;
 import penso.stackhat.server.filter.JWTTokenNeeded;
-import penso.stackhat.server.rest.DatabaseRequest;
 
 /**
  * Root resource (exposed at "databases" path)

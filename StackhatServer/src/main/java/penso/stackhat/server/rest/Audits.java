@@ -16,25 +16,25 @@ import javax.ws.rs.core.StreamingOutput;
 
 import penso.stackhat.builtwith.*;
 import penso.stackhat.server.filter.JWTTokenNeeded;
-import penso.stackhat.server.rest.DatabaseRequest;
+import penso.stackhat.server.model.NewAuditRequest;
 
 /**
  * Root resource (exposed at "databases" path)
  */
-@Path("/databases")
-public class Databases {
-    /**
-     * Method handling HTTP GET requests. The returned object will be sent to the
-     * client as "text/plain" media type.
-     *
-     * @return String that will be returned as a text/plain response.
-     */
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    @JWTTokenNeeded
-    public String getIt() {
-        return "Hello World!";
-    }
+@Path("/audits")
+public class Audits {
+    // /**
+    //  * Method handling HTTP GET requests. The returned object will be sent to the
+    //  * client as "text/plain" media type.
+    //  *
+    //  * @return String that will be returned as a text/plain response.
+    //  */
+    // @GET
+    // @Produces(MediaType.TEXT_PLAIN)
+    // @JWTTokenNeeded
+    // public String getIt() {
+    //     return "Hello World!";
+    // }
 
     /**
      * Method handling HTTP POST requests. The returned object will be sent to the
@@ -46,7 +46,7 @@ public class Databases {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @JWTTokenNeeded
-    public Response postIt(final DatabaseRequest request) {
+    public Response postIt(final NewAuditRequest request) {
 
         String path = "./tmp.xlsx";
         String pathDatabase = Program.pathDatabase;

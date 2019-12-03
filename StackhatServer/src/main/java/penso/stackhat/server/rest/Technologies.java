@@ -1,24 +1,14 @@
 package penso.stackhat.server.rest;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 
-import penso.stackhat.builtwith.*;
-import penso.stackhat.builtwith.models.*;
 import penso.stackhat.server.filter.JWTTokenNeeded;
-import penso.stackhat.server.rest.DatabaseRequest;
+import penso.stackhat.server.model.NewTechnologyRequest;
 
 /**
  * Root resource (exposed at "databases" path)
@@ -32,11 +22,18 @@ public class Technologies {
      * @return String that will be returned as a text/plain response.
      */
     @POST
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @JWTTokenNeeded
-    public Response postIt(final String category) {
+    public Response postIt(final NewTechnologyRequest request) {
 
+        // TODO: This endpoint should take the values 
+        // supplied in the request parameter and use a method on the 
+        // Database class to add a new technology to the DATABASE tab
+
+        // implement here..
+
+        // response
         return Response.ok()
             .build();
     }
