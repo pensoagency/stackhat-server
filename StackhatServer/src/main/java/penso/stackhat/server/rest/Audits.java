@@ -62,7 +62,7 @@ public class Audits {
         String uid = UUID.randomUUID().toString();
 
         try {
-            String pathDestination = pathAuditsBase + uid + ".xslx";
+            String pathDestination = pathAuditsBase + uid + ".xlsx";
             File fileDestination = new File(pathDestination);
 
             // create a copy of the template
