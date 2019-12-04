@@ -1,11 +1,14 @@
 package penso.stackhat.server.model;
 
+import java.util.Date;
+
 public class AuditResponse {
     public String id = "";
     public String[] urls;
     public String title = "";
     public Boolean isReady = false;
     public Boolean isError = false;
+    public Date created = new Date(System.currentTimeMillis());
 
     public void setIsReady(Boolean isReady) { this.isReady=isReady; }      
     public void setIsError(Boolean isError) { this.isReady=isError; }    

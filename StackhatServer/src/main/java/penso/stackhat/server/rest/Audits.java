@@ -42,23 +42,51 @@ import penso.stackhat.server.util.ParamRunnable;
 @Path("/audits")
 public class Audits {
 
+    // @GET
+    // @Produces(MediaType.APPLICATION_JSON)
+    // @JWTTokenNeeded
+    // public Response getIt(String id) {
+
+    // try {
+    // List<String> lines = Files.readAllLines(Paths.get(Program.pathAuditsBase + id
+    // + ".json"));
+
+    // // return
+    // return Response.ok(lines.toString()).build();
+
+    // } catch (FileNotFoundException e) {
+    // return Response.status(404).build();
+    // } catch (Exception e) {
+    // return Response.status(500).build();
+    // }
+
+    // }
+
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @JWTTokenNeeded
-    public Response getIt(String id) {
+    @Path("{id}/download")
+    public Response getIt(@PathParam("id") final String id) {
 
-        try {
-            List<String> lines = Files.readAllLines(Paths.get(Program.pathAuditsBase + id + ".json"));
+        StreamingOutput fileStream = new StreamingOutput() {
+            @Override
+            public void write(java.io.OutputStream output) throws IOException, WebApplicationException {
+                try {
+                    java.nio.file.Path path = Paths.get(Program.pathAuditsBase + id + ".xlsx");
+                    byte[] data = Files.readAllBytes(path);
+                    output.write(data);
+                    output.flush();
+                } catch (Exception e) {
+                    throw new WebApplicationException("File Not Found !!");
+                }
+            }
+        };
 
-            // return
-            return Response.ok(lines.toString()).build();
+        String fileName = String.format("audit-{0}.xlsx", id);
 
-        } catch (FileNotFoundException e) {
-            return Response.status(404).build();
-        } catch (Exception e) {
-            return Response.status(500).build();
-        }
-
+        return Response.ok(fileStream, MediaType.APPLICATION_OCTET_STREAM)
+                .header("content-disposition", String.format("attachment; filename = {0}", fileName))
+                .header("x-filename", fileName)
+                .build();
     }
 
     @GET
@@ -66,12 +94,11 @@ public class Audits {
     @JWTTokenNeeded
     public Response getAll() {
 
-        try
-        {
+        try {
             ArrayList<Object> result = new ArrayList<Object>();
 
             File dir = new File(Program.pathAuditsBase);
-            File [] files = dir.listFiles(new FilenameFilter() {
+            File[] files = dir.listFiles(new FilenameFilter() {
                 @Override
                 public boolean accept(File dir, String name) {
                     return name.endsWith(".json");
@@ -83,17 +110,16 @@ public class Audits {
                 result.add(parser.parse(new FileReader(jsonFile.getAbsolutePath())));
             }
 
-            // return 
-            return Response.ok(result)
-                .build();
- 
+            // return
+            return Response.ok(result).build();
+
         } catch (FileNotFoundException e) {
             return Response.status(404).build();
         } catch (Exception e) {
             return Response.status(500).build();
         }
 
-    }    
+    }
 
     /**
      * Method handling HTTP POST requests. The returned object will be sent to the
@@ -108,26 +134,27 @@ public class Audits {
     public Response postIt(final NewAuditRequest request) {
 
         // build log / result
-        AuditResponse result = new AuditResponse(UUID.randomUUID().toString(), request.urls, request.name, false, false);
+        AuditResponse result = new AuditResponse(UUID.randomUUID().toString(), request.urls, request.name, false,
+                false);
 
         try {
 
             // write initial detail file
-            writeAuditJson(result);    
+            writeAuditJson(result);
 
             new Thread(new ParamRunnable<AuditResponse>(result) {
 
                 @Override
                 public void run() {
-                    String pathTemplate = Program.pathTemplate;
-                    String pathDatabase = Program.pathDatabase;
-                    String pathAuditsBase = Program.pathAuditsBase;
-                    String APIKey = Program.APIKey; // API
-
-                    String pathDestination = pathAuditsBase + this.parameter.id + ".xlsx";
-                    File fileDestination = new File(pathDestination);
-
                     try {
+                        String pathTemplate = Program.pathTemplate;
+                        String pathDatabase = Program.pathDatabase;
+                        String pathAuditsBase = Program.pathAuditsBase;
+                        String APIKey = Program.APIKey; // API
+
+                        String pathDestination = pathAuditsBase + this.parameter.id + ".xlsx";
+                        File fileDestination = new File(pathDestination);
+
                         // create a copy of the template
                         Files.copy((new File(pathTemplate)).toPath(), fileDestination.toPath(),
                                 StandardCopyOption.REPLACE_EXISTING);
@@ -137,16 +164,14 @@ public class Audits {
 
                         // write success
                         this.parameter.setIsReady(true);
-                        writeAuditJson(this.parameter);                        
-                    } 
-                    catch (Exception ex) 
-                    {
+                        writeAuditJson(this.parameter);
+                    } catch (Exception ex) {
                         // write failed
                         this.parameter.setIsError(true);
-                        writeAuditJson(this.parameter);                        
+                        writeAuditJson(this.parameter);
                     }
                 }
-            });
+            }).start();
 
             return Response.ok(result).build();
 
@@ -163,12 +188,14 @@ public class Audits {
         json.put("title", result.title);
         json.put("isReady", result.isReady);
         json.put("isError", result.isError);
+        json.put("created", result.created);
 
         try {
-            try (FileWriter fileResultWriter = new FileWriter(Program.pathAuditsBase + result.id + ".json")) {
+            try (FileWriter fileResultWriter = new FileWriter(Program.pathAuditsBase + result.id + ".json", false)) {
                 fileResultWriter.write(json.toString());
+                fileResultWriter.close();
             }
         } catch (Exception ex) {
         }
-    }    
+    }
 }
