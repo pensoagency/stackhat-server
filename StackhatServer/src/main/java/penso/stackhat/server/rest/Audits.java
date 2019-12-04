@@ -1,11 +1,13 @@
 package penso.stackhat.server.rest;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -18,9 +20,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import org.json.JSONObject;
+
 import penso.stackhat.builtwith.*;
 import penso.stackhat.server.filter.JWTTokenNeeded;
+import penso.stackhat.server.model.AuditResponse;
 import penso.stackhat.server.model.NewAuditRequest;
+import penso.stackhat.server.util.ParamRunnable;
 
 /**
  * Root resource (exposed at "databases" path)
@@ -52,29 +58,48 @@ public class Audits {
     @JWTTokenNeeded
     public Response postIt(final NewAuditRequest request) {
 
-        String pathTemplate = Program.pathTemplate;
-        String pathDatabase = Program.pathDatabase;
-        String pathAuditsBase = Program.pathAuditsBase;
-
-        String APIKey = Program.APIKey; // API
-
-        // generate uid for this request
-        String uid = UUID.randomUUID().toString();
+        // build log / result
+        AuditResponse result = new AuditResponse(UUID.randomUUID().toString(), request.urls, request.name, false, false);
 
         try {
-            String pathDestination = pathAuditsBase + uid + ".xlsx";
-            File fileDestination = new File(pathDestination);
 
-            // create a copy of the template
-            Files.copy((new File(pathTemplate)).toPath(), fileDestination.toPath(),
-                    StandardCopyOption.REPLACE_EXISTING);
+            // write initial detail file
+            writeAuditJson(result);    
 
-            Program program = new Program();
-            program.start(request.getUrls(), pathDestination, pathDatabase, APIKey);
+            new Thread(new ParamRunnable<AuditResponse>(result) {
 
-            return Response.ok((Object)fileDestination)
-                    .header("content-disposition", "attachment; filename = audit.xlsx")
-                    .build();
+                @Override
+                public void run() {
+                    String pathTemplate = Program.pathTemplate;
+                    String pathDatabase = Program.pathDatabase;
+                    String pathAuditsBase = Program.pathAuditsBase;
+                    String APIKey = Program.APIKey; // API
+
+                    String pathDestination = pathAuditsBase + this.parameter.id + ".xlsx";
+                    File fileDestination = new File(pathDestination);
+
+                    try {
+                        // create a copy of the template
+                        Files.copy((new File(pathTemplate)).toPath(), fileDestination.toPath(),
+                                StandardCopyOption.REPLACE_EXISTING);
+
+                        Program program = new Program();
+                        program.start(request.getUrls(), pathDestination, pathDatabase, APIKey);
+
+                        // write success
+                        this.parameter.setIsReady(true);
+                        writeAuditJson(this.parameter);                        
+                    } 
+                    catch (Exception ex) 
+                    {
+                        // write failed
+                        this.parameter.setIsError(true);
+                        writeAuditJson(this.parameter);                        
+                    }
+                }
+            });
+
+            return Response.ok(result).build();
 
             // // return file
             // StreamingOutput fileStream = new StreamingOutput()) {
@@ -101,4 +126,21 @@ public class Audits {
             return Response.serverError().build();
         }
     }
+
+    private void writeAuditJson(AuditResponse result) {
+        // create json version
+        JSONObject json = new JSONObject();
+        json.put("id", result.id);
+        json.put("urls", result.urls);
+        json.put("title", result.title);
+        json.put("isReady", result.isReady);
+        json.put("isError", result.isError);
+
+        try {
+            try (FileWriter fileResultWriter = new FileWriter(Program.pathAuditsBase + result.id + ".json")) {
+                fileResultWriter.write(json.toString());
+            }
+        } catch (Exception ex) {
+        }
+    }    
 }
