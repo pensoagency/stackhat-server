@@ -2,15 +2,7 @@
 
 ## BuiltWith
 
-BuiltWith API connector implementation that compiles data into Excel sheets.
-
-To build / install
-
-`mvn clean install`
-
-With full deps
-
-`mvn clean compile assembly:single`
+No longer in use, use StackhatServer folder / project.
 
 ## StackhatServer
 
@@ -24,6 +16,12 @@ To build / run tests
 To run local server
 
 `mvn exec:java`
+
+To build WAR file for deployment
+
+`mvn clean package`
+
+File will be created in ./target folder ready for deployment.
 
 ## Application Hosting
 

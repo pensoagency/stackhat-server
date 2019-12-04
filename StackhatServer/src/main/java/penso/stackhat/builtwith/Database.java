@@ -190,7 +190,7 @@ public class Database {
 			String categoryTitle = cell.getStringCellValue();			
 
 			// has category changed?
-			if (currentCategory != null && currentCategory.Title != categoryTitle) {
+			if (currentCategory != null && !currentCategory.Title.equals(categoryTitle)) {
 				// yes -> add current name to this cat
 				currentCategory.Names.add(currentName);
 				currentName = null;
@@ -215,7 +215,7 @@ public class Database {
 			String nameTitle = cell.getStringCellValue();
 
 			// has name changed?
-			if (currentName != null && currentName.Title != nameTitle) {
+			if (currentName != null && !currentName.Title.equals(nameTitle)) {
 				// yes -> add existing to list
 				currentCategory.Names.add(currentName);
 				// set null to trigger new item
