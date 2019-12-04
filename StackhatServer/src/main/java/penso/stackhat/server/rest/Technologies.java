@@ -1,5 +1,6 @@
 package penso.stackhat.server.rest;
 
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -7,6 +8,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import penso.stackhat.newtech.Program;
 import penso.stackhat.server.filter.JWTTokenNeeded;
 import penso.stackhat.server.model.NewTechnologyRequest;
 
@@ -33,8 +35,21 @@ public class Technologies {
 
         // implement here..
 
-        // response
-        return Response.ok()
-            .build();
+        String pathDatabase = Program.pathDatabase;
+
+        
+        try {
+            Program program = new Program();
+            String [] newtech = {request.getCategory(),request.getName(),request.getTechnology()};
+        
+            program.start(newtech, pathDatabase);// this is going to add the newtech directly to the database.xlsx
+
+
+            return Response.ok().build();
+
+        } catch (Exception ex) {
+            return Response.serverError().build();
+        }
+    	
     }
 }
