@@ -10,15 +10,20 @@ public class BuiltWithLauncher {
 	 */
 	public static void main(String[] args2) throws IOException, Exception {
 
+		
 		String [] args= {
-				"conservatives.com"
-//				"https://aws.amazon.com/cn/",
-//				"https://github.com/",
-//				"unimelb.edu.au",
-//				"www.coles.com.au",
-//				"pensoagency.com"
+				"conservatives.com",
+				"https://aws.amazon.com/cn/",
+				"https://github.com/",
+				"unimelb.edu.au",
+				"www.coles.com.au",
+				"pensoagency.com"
 		};
 		
+		if(args.length>100) {
+			throw new ArithmeticException("Max 100 URLs, please try again");
+		}
+
 		String path = "C:\\Users\\myxll\\Desktop\\test\\tmp.xlsx";
 		String pathDatabase = "C:\\Users\\myxll\\Desktop\\test\\database.xlsx";
 
