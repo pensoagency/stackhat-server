@@ -2,7 +2,6 @@ package penso.stackhat.builtwith;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +11,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-//import org.junit.Test;
 
 import penso.stackhat.builtwith.models.Category;
 import penso.stackhat.builtwith.models.Name;
@@ -21,49 +19,48 @@ public class Database {
 
 	/**
 	 * match the Tech table with database, filled "Yes" if match
+	 * 
 	 * @return an arraylist contains the new Tech for the current domain
 	 */
-	public ArrayList<String> matchDatabase(XSSFWorkbook wb, int colTech, int colData) throws IOException {
+	public ArrayList<String> matchDatabase(XSSFWorkbook wb, int colTech, int colData, String sheetDatabase,ArrayList<Tech> techs) throws IOException {
 		ArrayList<String> newTech = new ArrayList<String>();
-		XSSFSheet sheetData = wb.getSheet("DATABASE");
-		XSSFSheet sheetTech = wb.getSheet("Tech BW Name");
+		XSSFSheet sheetData = wb.getSheet(sheetDatabase);
 		int lastData = sheetData.getLastRowNum();
-		int lastTech = sheetTech.getLastRowNum();
-		outer: for (int i = 2; i <= lastTech; i++) { // tech starts from row 3 in sheet "Database"
-			Row rowTech = sheetTech.getRow(i);
-			Cell cellTech = rowTech.getCell(colTech);
-			if (cellTech == null)
-				break;
-			String Tech = cellTech.getRichStringCellValue().toString();
+		int len = techs.size();
+		outer: for (int i = 0; i < len; i++) { // tech starts from row 3 in sheet "Database"
+			String name = techs.get(i).getName();
 			for (int j = 2; j <= lastData; j++) { // domain starts on row 3 in sheet "Database"
 				Row rowData = sheetData.getRow(j);
 				Cell cellData = rowData.getCell(3);
 				if (cellData == null) {
-					newTech.add(Tech);
+					newTech.add(name);
 					continue outer;
 				}
 				String Data = cellData.getRichStringCellValue().toString();
-				if (Tech.equals(Data)) {
-					if(Tech.equals("")&&Data.equals(""))
+				if (name.equals(Data)) {
+					if (name.equals("") && Data.equals(""))
 						break;
 					Cell cellYes = rowData.createCell(colData);
 					cellYes.setCellValue("Yes");
+					techs.get(i).setPensoName(rowData.getCell(2).getRichStringCellValue().toString());
 					continue outer;
 				}
 			}
-			newTech.add(Tech);
+			newTech.add(name);
 		}
 		return newTech;
 	}
 
 	/**
 	 * if the tech does NOT exist in the database, add it to the arraylist
+	 * 
 	 * @return an arraylist of all the new technologies
 	 * @throws IOException
 	 */
-	public ArrayList<String> ifExistInDatabase(HashMap<String, Integer> map, XSSFWorkbook wb) throws IOException {
+	public ArrayList<String> ifExistInDatabase(HashMap<String, Integer> map, XSSFWorkbook wb, String sheetDatabase)
+			throws IOException {
 		ArrayList<String> newTech = new ArrayList<String>();
-		XSSFSheet sheet = wb.getSheet("DATABASE");
+		XSSFSheet sheet = wb.getSheet(sheetDatabase);
 
 		// BW names column D in sheet "Tech BW Name"
 		int colnum = 3;
@@ -122,11 +119,15 @@ public class Database {
 		return PensoNames;
 	}
 
-	public void matchPENSOName(ArrayList<String> PensoNames,int colNum,XSSFWorkbook wb, String sheetName) throws IOException {
+	/**
+	 * insert 1 on the summary sheet
+	 */
+	public void matchPENSOName(ArrayList<String> PensoNames, int colNum, XSSFWorkbook wb, String sheetName)
+			throws IOException {
 		XSSFSheet sheetSummary = wb.getSheet(sheetName);
 		int lastRow = sheetSummary.getLastRowNum();
 
-		outer:for (String name : PensoNames) {
+		outer: for (String name : PensoNames) {
 			for (int i = 5; i <= lastRow; i++) {
 				Row row = sheetSummary.getRow(i);
 				Cell cell = row.getCell(0);
@@ -134,16 +135,74 @@ public class Database {
 					continue;
 				String Tech = cell.getRichStringCellValue().toString();
 				if (Tech.equals(name)) {
-					if (row.getCell(colNum+2) == null) {
-						row.createCell(colNum+2);
+					if (row.getCell(colNum + 2) == null) {
+						row.createCell(colNum + 2);
 					}
-					Cell cell3=row.getCell(colNum+2);
+					Cell cell3 = row.getCell(colNum + 2);
 					cell3.setCellValue(1);
 					continue outer;
 				}
 			}
 		}
+		// row num : i
+		// col num: colNum+2
+
 	}
+
+	/**
+	 * insert 1 on the summary sheet
+	 * @return row index & col index
+	 */
+	public penso.stackhat.builtwith.Cell matchCurrentPENSOName(String PensoName, int colNum, XSSFWorkbook wb, String sheetName)
+			throws IOException {
+		XSSFSheet sheetSummary = wb.getSheet(sheetName);
+		int lastRow = sheetSummary.getLastRowNum();
+		penso.stackhat.builtwith.Cell pensoCell = new penso.stackhat.builtwith.Cell();
+		for (int i = 5; i <= lastRow; i++) {
+			Row row = sheetSummary.getRow(i);
+			Cell cell = row.getCell(0);
+			if (cell == null)
+				continue;
+			String Tech = cell.getRichStringCellValue().toString();
+			if (Tech.equals(PensoName)) {
+				if (row.getCell(colNum + 2) == null) {
+					row.createCell(colNum + 2);
+				}
+				Cell cell3 = row.getCell(colNum + 2);
+				cell3.setCellValue(1);
+				pensoCell.setRowNum(i);
+				pensoCell.setColNum(colNum + 2);
+			}
+		}
+		// row num : i
+		// col num: colNum+2
+		return pensoCell;
+	}
+
+	
+	/**
+	 * 
+	 */
+	public penso.stackhat.builtwith.Cell matchHistoricalPENSOName(String PensoName, int colNum, XSSFWorkbook wb, String sheetName)
+			throws IOException {
+		XSSFSheet sheetSummary = wb.getSheet(sheetName);
+		int lastRow = sheetSummary.getLastRowNum();
+		penso.stackhat.builtwith.Cell pensoCell = new penso.stackhat.builtwith.Cell();
+		for (int i = 5; i <= lastRow; i++) {
+			Row row = sheetSummary.getRow(i);
+			Cell cell = row.getCell(0);
+			if (cell == null)
+				continue;
+			String Tech = cell.getRichStringCellValue().toString();
+			if (Tech.equals(PensoName)) {
+				// row num : i
+				// col num: colNum+2
+				pensoCell.setRowNum(i);
+				pensoCell.setColNum(colNum + 2);
+			}
+		}
+		return pensoCell;
+	}	
 	
 	public ArrayList<String> getAllCategories(String path, String summary) throws IOException{
 		File file = new File(path);

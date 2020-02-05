@@ -26,6 +26,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -133,6 +134,13 @@ public class Audits {
     @JWTTokenNeeded
     public Response postIt(final NewAuditRequest request) {
 
+        // max 100 domains
+        if (request.urls.length > 100) {
+            Response.ResponseBuilder tooManyUrls = Response.status(Status.BAD_REQUEST);
+            tooManyUrls.entity("Maximum 100 domains per audit.");
+            return tooManyUrls.build();
+        }
+
         // build log / result
         AuditResponse result = new AuditResponse(UUID.randomUUID().toString(), request.urls, request.name, false,
                 false);
@@ -160,7 +168,7 @@ public class Audits {
                                 StandardCopyOption.REPLACE_EXISTING);
 
                         Program program = new Program();
-                        program.start(request.getUrls(), pathDestination, pathDatabase, APIKey);
+                        program.start(this.parameter.urls, pathDestination, pathDatabase, APIKey);
 
                         // write success
                         this.parameter.setIsReady(true);

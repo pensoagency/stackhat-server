@@ -1,11 +1,15 @@
 package penso.stackhat.builtwith;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -16,13 +20,13 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-//import org.junit.Test;
 
 public class Excel {
 	private String domain;
@@ -128,7 +132,7 @@ public class Excel {
 
 		// write all map keys
 		Row keyRow = sheet.getRow(rowNum);
-		keyRow.createCell(colNum).setCellValue("technique");
+		keyRow.createCell(colNum).setCellValue("Technology");
 		// create the nth row in "Sheet1"
 		rowNum += 1;
 		for (Map.Entry<String, Integer> entry : list) {
@@ -222,14 +226,15 @@ public class Excel {
 	}
 
 	/**
-	 * insert formula to calculate SUM and AVERAGE
+	 * The most time-consuming function in this project. insert formula to calculate
+	 * SUM and AVERAGE
 	 * 
 	 * @param totalNumDomain total number of domains
 	 * @param rowNum         first tech row number
 	 * @param sheetName      summary sheet name
 	 */
-	public void insertFormula(int totalNumDomain, int rowNum, String sheetName, XSSFWorkbook wb,ArrayList<String> categories)
-			throws IOException, InvalidFormatException {
+	public void insertFormula(int totalNumDomain, int rowNum, String sheetName, XSSFWorkbook wb,
+			ArrayList<String> categories) throws IOException, InvalidFormatException {
 
 		// create an excel sheet "Sheet1"
 		XSSFSheet sheet = wb.getSheet(sheetName);
@@ -249,7 +254,7 @@ public class Excel {
 //					|| content.equals("Advertising") || content.equals("Audio/Video Media") || content.equals("Mapping")
 //					|| content.equals("Payment")||content.equals("Email Marketing")
 //					|| content.equals("Marketing Automation")) {
-			if(categories.contains(content)) {
+			if (categories.contains(content)) {
 				rowNum++;
 				continue;
 			}
@@ -259,7 +264,7 @@ public class Excel {
 				row.createCell(1);
 			Cell cellAverage = row.getCell(1);
 			Cell cellTotal = row.getCell(2);
-			cellTotal.setCellFormula("SUM(D" + (rowNum + 1) + ":ALQ" + (rowNum + 1) + ")");
+			cellTotal.setCellFormula("SUM(D" + (rowNum + 1) + ":DZ" + (rowNum + 1) + ")");
 			XSSFFormulaEvaluator.evaluateAllFormulaCells(wb);
 
 			// set Average column
@@ -298,6 +303,12 @@ public class Excel {
 		out.close();
 	}
 
+	public void closeAndWrite(XSSFWorkbook wb, FileOutputStream out) throws IOException {
+		wb.write(out);
+		wb.close();
+		out.close();
+	}
+
 	public void insertDomain(String[] args, String path, XSSFWorkbook wb, String summary, String newTechSheet,
 			String techBWName, String databaseSheet) throws IOException {
 		int totalNum = args.length;
@@ -311,11 +322,12 @@ public class Excel {
 		Row rowDatabase = sheetDatabase.getRow(1);
 		Row rowNewTechEachWeb = sheetNewTechEachWeb.getRow(1);
 		Row rowTechBWName = sheetTechBWName.getRow(1);
+
 		int index = 0;
 		for (int i = 0; i < totalNum; i++) {
 			if (rowSummary.getCell(index + 3) == null) { // +3 means start from column D on sheet "Summary”
 				rowSummary.createCell(index + 3);
-			} 
+			}
 			if (rowDatabase.getCell(index + 6) == null) { // start form G
 				rowDatabase.createCell(index + 6);
 				sheetDatabase.autoSizeColumn(index + 6);
@@ -337,74 +349,161 @@ public class Excel {
 		}
 	}
 
-	/** update "ALL WEBs" in database.xlsx
-	 * */
-	@SuppressWarnings({ "deprecation", "static-access" })
-	public void updateTemplate(String path) throws IOException {
-//		String path = "C:\\Users\\myxll\\Desktop\\test\\database.xlsx";
-		File database = new File(path);
-		FileInputStream in = new FileInputStream(database);
-		XSSFWorkbook wb = new XSSFWorkbook(in);
-		XSSFSheet sheetData = wb.getSheet("DATABASE");
-		XSSFSheet sheetTmp = wb.getSheet("ALL WEBs");
+	public void insertDomain(String[] args, String path, XSSFWorkbook wb, String allTechSheet) throws IOException {
+		int totalNum = args.length;
 
-		FileOutputStream out = new FileOutputStream(database);
+		XSSFSheet sheetAllTech = wb.getSheet(allTechSheet);
+
+		Row rowAllTech = sheetAllTech.getRow(2);
+		Row rowLabel = sheetAllTech.getRow(3);
+
+		for (int j = 3; j < 4 * totalNum + 3; j++) {
+			if (rowAllTech.getCell(j) == null)
+				rowAllTech.createCell(j);
+			if (rowLabel.getCell(j) == null)
+				rowLabel.createCell(j);
+		}
+		int index = 0;
+
+		for (int i = 0; i < totalNum; i++) {
+			if (rowAllTech.getCell(index + 3) == null) { // same as sheet "Summary"
+				rowAllTech.createCell(index + 3);
+			}
+			rowAllTech.getCell(index + 3).setCellValue(args[i]);
+
+			CellRangeAddress rangeAddress = new CellRangeAddress(2, 2, index + 3, index + 6); // merge cell
+			sheetAllTech.addMergedRegion(rangeAddress);
+			CellStyle style = rowLabel.getCell(3).getCellStyle();// column D as standard cell style
+			
+			rowLabel.getCell(index + 3).setCellValue("Status");
+			rowLabel.getCell(index + 4).setCellValue("First Detected");
+			rowLabel.getCell(index + 5).setCellValue("Last Detected");
+			rowLabel.getCell(index + 6).setCellValue("Duration");
+			
+			rowLabel.getCell(index + 3).setCellStyle(style);
+			rowLabel.getCell(index + 4).setCellStyle(style);
+			rowLabel.getCell(index + 5).setCellStyle(style);
+			rowLabel.getCell(index + 6).setCellStyle(style);
+
+			index += 4;
+		}
+
+	}
+
+	public void insertDomain(String[] args, String path, XSSFWorkbook wb, String summary, String newTechSheet,
+			String techBWName, String databaseSheet, String allTechSheet) throws IOException {
+		int totalNum = args.length;
+
+		XSSFSheet sheetSummary = wb.getSheet(summary);
+		XSSFSheet sheetDatabase = wb.getSheet(databaseSheet);
+		XSSFSheet sheetNewTechEachWeb = wb.getSheet(newTechSheet);
+		XSSFSheet sheetTechBWName = wb.getSheet(techBWName);
+		XSSFSheet sheetAllTech = wb.getSheet(allTechSheet);
+
+		Row rowSummary = sheetSummary.getRow(2);
+		Row rowDatabase = sheetDatabase.getRow(1);
+		Row rowNewTechEachWeb = sheetNewTechEachWeb.getRow(1);
+		Row rowTechBWName = sheetTechBWName.getRow(1);
+		Row rowAllTech = sheetAllTech.getRow(2);
+
+		int index = 0;
+		for (int i = 0; i < totalNum; i++) {
+			if (rowSummary.getCell(index + 3) == null) { // +3 means start from column D on sheet "Summary”
+				rowSummary.createCell(index + 3);
+			}
+			if (rowDatabase.getCell(index + 6) == null) { // start form G
+				rowDatabase.createCell(index + 6);
+				sheetDatabase.autoSizeColumn(index + 6);
+			}
+			if (rowNewTechEachWeb.getCell(index + 1) == null) { // start from B
+				rowNewTechEachWeb.createCell(index + 1);
+				sheetNewTechEachWeb.autoSizeColumn(index + 1);
+			}
+			if (rowTechBWName.getCell(index + 2) == null) { // start from C
+				rowTechBWName.createCell(index + 2);
+				sheetTechBWName.autoSizeColumn(index + 2);
+			}
+			if (rowAllTech.getCell(index + 3) == null) { // same as sheet "Summary"
+				rowAllTech.createCell(index + 3);
+			}
+			rowSummary.getCell(index + 3).setCellValue(args[i]);
+			rowDatabase.getCell(index + 6).setCellValue(args[i]);
+			rowNewTechEachWeb.getCell(index + 1).setCellValue(args[i]);
+			rowTechBWName.getCell(index + 2).setCellValue(args[i]);
+			rowAllTech.getCell(index + 3).setCellValue(args[i]);
+			sheetSummary.autoSizeColumn(index + 3);
+			sheetAllTech.autoSizeColumn(index + 3);
+			index++;
+		}
+	}
+
+	/**
+	 * update "ALL WEBs" in database.xlsx
+	 */
+	@SuppressWarnings({ "deprecation", "static-access" })
+	public void updateDatabase(XSSFWorkbook database, String sheetDatabase, String sheetSummary,BufferedOutputStream bufferedOutTemplate) throws IOException {
+//		String path = "C:\\Users\\myxll\\Desktop\\test\\database.xlsx";
+//		File database = new File(path);
+//		FileInputStream in = new FileInputStream(database);
+//		XSSFWorkbook wb = new XSSFWorkbook(in);
+		XSSFSheet sheetData = database.getSheet(sheetDatabase);
+		XSSFSheet sheetTmp = database.getSheet(sheetSummary);
 
 		int lastRowData = sheetData.getLastRowNum();
 		Map<String, String> map = new HashMap<String, String>();
 		String category = null;
 
-		XSSFFont font = wb.createFont();
+		XSSFFont font = database.createFont();
 		font.setBold(true);
-		
-		XSSFCellStyle style = wb.createCellStyle();
+
+		XSSFCellStyle style = database.createCellStyle();
 		byte[] rgb = new byte[3];
-		rgb[0]=(byte)242;
-		rgb[1]=(byte)242;
-		rgb[2]=(byte)242;
+		rgb[0] = (byte) 242;
+		rgb[1] = (byte) 242;
+		rgb[2] = (byte) 242;
 		XSSFColor color = new XSSFColor(rgb);
 		style.setFillForegroundColor(color);
 		style.setFillPattern(style.SOLID_FOREGROUND);
-		
+
 		style.setFont(font);
-		
+
 		outer: for (int i = 2; i <= lastRowData; i++) {
 			Row rowData = sheetData.getRow(i);
 //			System.out.println("i= " + i);
 			Cell cellDataCategory = rowData.getCell(1);
 			Cell cellDataPensoname = rowData.getCell(2);
 
-			if (i==2) {
+			if (i == 2) {
 				category = cellDataCategory.getStringCellValue();
 			}
 //			System.out.println("i: "+i);
-			if (cellDataCategory.getStringCellValue() != category||i==lastRowData) {
-				if(i==lastRowData)
+			if (cellDataCategory.getStringCellValue() != category || i == lastRowData) {
+				if (i == lastRowData)
 					map.put(cellDataPensoname.getStringCellValue(), "");
 				int lastRowTmp = sheetTmp.getLastRowNum();
-				for (int j = 4; j <= lastRowTmp+1; j++) {
+				for (int j = 4; j <= lastRowTmp + 1; j++) {
 					Row rowTmp = sheetTmp.getRow(j);
 					Cell cellTmp = rowTmp.getCell(0);
 					String value = cellTmp.getStringCellValue();
 //					System.out.println("j: "+j);
 					if (value.equals(category)) {
 						for (Map.Entry<String, String> entry : map.entrySet()) {
-								lastRowTmp = sheetTmp.getLastRowNum();
-								if(j==lastRowTmp) {
-									Row row = sheetTmp.createRow(j+1);
-									Cell cell = row.createCell(0);
-									
-									cell.setCellValue(entry.getKey());
-									cell.setCellStyle(style);
-									continue;
-								}
-
-								sheetTmp.shiftRows(j + 1, lastRowTmp, 1);
+							lastRowTmp = sheetTmp.getLastRowNum();
+							if (j == lastRowTmp) {
 								Row row = sheetTmp.createRow(j + 1);
 								Cell cell = row.createCell(0);
-								
+
 								cell.setCellValue(entry.getKey());
 								cell.setCellStyle(style);
+								continue;
+							}
+
+							sheetTmp.shiftRows(j + 1, lastRowTmp, 1);
+							Row row = sheetTmp.createRow(j + 1);
+							Cell cell = row.createCell(0);
+
+							cell.setCellValue(entry.getKey());
+							cell.setCellStyle(style);
 						}
 						category = cellDataCategory.getStringCellValue();
 						map.clear();
@@ -413,34 +512,27 @@ public class Excel {
 					}
 				}
 			}
-			
+
 			if (!map.containsKey(cellDataPensoname.getStringCellValue())) {
 				map.put(cellDataPensoname.getStringCellValue(), "");
 			}
-			
+
 		}
-
-		wb.write(out);
-		out.close();
-		wb.close();
-
+//
+//		database.write(outDatabase);
+//		outDatabase.close();
+//		database.close();
+		bufferedOutTemplate.flush();
 	}
 
 	/**
 	 * copy sheet "ALL webs" from database.xlsx to tmp.xlsx
 	 */
-	public void copyTemplate(String pathData, String pathTmp) throws IOException {
-		File myDatabase = new File(pathData);
-		File myTemplate = new File(pathTmp);
+	public void copyTemplate(XSSFWorkbook database, XSSFWorkbook template, String sheetTemplate, String sheetDatabase,BufferedOutputStream bufferedOutTemplate)
+			throws IOException {
 
-		FileInputStream inData = new FileInputStream(myDatabase);
-		FileInputStream inTmp = new FileInputStream(myTemplate);
-
-		XSSFWorkbook wbData = new XSSFWorkbook(inData);
-		XSSFWorkbook wbTmp = new XSSFWorkbook(inTmp);
-
-		XSSFSheet sheetData = wbData.getSheet("ALL WEBs");
-		XSSFSheet sheetTmp = wbTmp.getSheet("ALL WEBs");
+		XSSFSheet sheetData = database.getSheet(sheetDatabase);
+		XSSFSheet sheetTmp = template.getSheet(sheetTemplate);
 
 		int lastRow = sheetData.getLastRowNum();
 		for (int i = 4; i <= lastRow; i++) {
@@ -459,38 +551,24 @@ public class Excel {
 				rowTmp.createCell(0);
 			Cell cellTmp = rowTmp.getCell(0);
 			CellStyle style = cellData.getCellStyle();
-			CellStyle newStyle = wbTmp.createCellStyle();
+			CellStyle newStyle = template.createCellStyle();
 			newStyle.cloneStyleFrom(style);
 			String cellValue = cellData.getStringCellValue();
 			cellTmp.setCellValue(cellValue);
 			cellTmp.setCellStyle(newStyle);
 		}
 
-		FileOutputStream out = new FileOutputStream(myTemplate);
-		wbTmp.write(out);
-		wbTmp.close();
-		wbData.close();
-		out.close();
+		bufferedOutTemplate.flush();
 	}
 
 	/**
 	 * copy the database from "Database.xlsx" to "template.xlsx" update the database
 	 * in template
 	 */
-	public void copyDatabase(String pathData, String pathTmp) throws IOException {
-//		File myDatabase= new File("C:\\Users\\myxll\\Desktop\\test\\database.xlsx");
-//		File myTemplate= new File("C:\\Users\\myxll\\Desktop\\test\\template.xlsx");
-		File myDatabase = new File(pathData);
-		File myTemplate = new File(pathTmp);
-
-		FileInputStream inData = new FileInputStream(myDatabase);
-		FileInputStream inTmp = new FileInputStream(myTemplate);
-
-		XSSFWorkbook wbData = new XSSFWorkbook(inData);
-		XSSFWorkbook wbTmp = new XSSFWorkbook(inTmp);
-
-		XSSFSheet sheetData = wbData.getSheet("DATABASE");
-		XSSFSheet sheetTmp = wbTmp.getSheet("DATABASE");
+	public void copyDatabase(XSSFWorkbook database, XSSFWorkbook template, String sheetDatabase,BufferedOutputStream bufferedOutTemplate) throws IOException {
+	
+		XSSFSheet sheetData = database.getSheet(sheetDatabase);
+		XSSFSheet sheetTmp = template.getSheet(sheetDatabase);
 
 		int lastRow = sheetData.getLastRowNum();
 
@@ -510,17 +588,13 @@ public class Excel {
 				rowTmp.createCell(2);
 			if (rowTmp.getCell(3) == null)
 				rowTmp.createCell(3);
-			copyRow(rowData, rowTmp, wbData, wbTmp);
+			copyRow(rowData, rowTmp, database, template);
 		}
 		sheetTmp.autoSizeColumn(1);
 		sheetTmp.autoSizeColumn(2);
 		sheetTmp.autoSizeColumn(3);
 
-		FileOutputStream out = new FileOutputStream(myTemplate);
-		wbTmp.write(out);
-		wbTmp.close();
-		wbData.close();
-		out.close();
+		bufferedOutTemplate.flush();
 	}
 
 	public void copyRow(Row r1, Row r2, XSSFWorkbook wbData, XSSFWorkbook wbTmp) {
@@ -540,42 +614,58 @@ public class Excel {
 		c2.setCellStyle(newStyle);// copy cell style
 	}
 
-	public void copyTemplateStyle(String path, String sheetName,ArrayList<String> categories) throws IOException {
+	public void copyTemplateStyle(XSSFWorkbook template, String sheetName, ArrayList<String> categories, BufferedOutputStream bufferedOutTemplate) throws IOException {
 
-		File myFile = new File(path);
-		FileInputStream in = new FileInputStream(myFile);
-		XSSFWorkbook wb = new XSSFWorkbook(in);
-		XSSFSheet sheet = wb.getSheet(sheetName);
+		XSSFSheet sheet = template.getSheet(sheetName);
 		int lastRow = sheet.getLastRowNum();
 		for (int i = 4; i <= lastRow; i++) {
 			Row row = sheet.getRow(i);
 			Cell cell = row.getCell(0);
 			if (cell == null)
 				break;
-//			if (cell.getStringCellValue().equals("CMS") || cell.getStringCellValue().equals("CDN")
-//					|| cell.getStringCellValue().equals("Analytics and Tracking")
-//					|| cell.getStringCellValue().equals("Mobile")
-//					|| cell.getStringCellValue().equals("Web Hosting Providers")
-//					|| cell.getStringCellValue().equals("Email Hosting Providers")
-//					|| cell.getStringCellValue().equals("Web Servers")
-//					|| cell.getStringCellValue().equals("Syndication Techniques")
-//					|| cell.getStringCellValue().equals("SSL certificates")
-//					|| cell.getStringCellValue().equals("Advertising")
-//					|| cell.getStringCellValue().equals("Audio/Video Media")
-//					|| cell.getStringCellValue().equals("Mapping") 
-//					|| cell.getStringCellValue().equals("Payment")
-//					||cell.getStringCellValue().equals("Email Marketing")
-//					||cell.getStringCellValue().equals("Marketing Automation")
-//					) {
-				if(categories.contains(cell.getStringCellValue())) {
+
+			if (categories.contains(cell.getStringCellValue())) {
 				CellStyle style = cell.getCellStyle();
 				row.setRowStyle(style);
 			}
 		}
 
-		FileOutputStream out = new FileOutputStream(myFile);
-		wb.write(out);
-		wb.close();
-		out.close();
+		bufferedOutTemplate.flush();
+	}
+
+	public void write(XSSFSheet sheet, penso.stackhat.builtwith.Cell cell, Tech tech, int colNum) {
+
+		int rowNum = cell.getRowNum();
+//		System.out.println(rowNum);
+		if (sheet.getRow(rowNum) == null) {
+			sheet.createRow(rowNum);
+		}
+		Row row = sheet.getRow(rowNum);
+		Long firstDetected = tech.getFirstDetectedTime();
+		Long lastDetected = tech.getLastDetectedTime();
+		String duration = tech.getDuration();
+		for (int i = colNum; i < colNum + 4; i++) {
+			if (row.getCell(i) == null)
+				row.createCell(i);
+		}
+
+		DateFormat formatter = new SimpleDateFormat("dd/MMM/yyyy"); // date format
+
+		Calendar calendarFirst = Calendar.getInstance();
+		calendarFirst.setTimeInMillis(firstDetected);
+		String firstDate = formatter.format(calendarFirst.getTime());
+
+		Calendar calendarLast = Calendar.getInstance();
+		calendarLast.setTimeInMillis(lastDetected);
+		String lastDate = formatter.format(calendarLast.getTime());
+
+		if (tech.isStatus())
+			row.getCell(colNum).setCellValue("Current");
+		if (tech.isStatus() == false)
+			row.getCell(colNum).setCellValue("Historical");
+		row.getCell(colNum + 1).setCellValue(firstDate);
+		row.getCell(colNum + 2).setCellValue(lastDate);
+		row.getCell(colNum + 3).setCellValue(duration);
+
 	}
 }
