@@ -16,8 +16,8 @@ public class Program {
 		File myDatabase = new File(pathDatabase);
 		FileInputStream inData = new FileInputStream(myDatabase);
 		XSSFWorkbook wbData = new XSSFWorkbook(inData);
-		XSSFSheet sheetDatabase = wbData.getSheet("DATABASE");
-		XSSFSheet sheetSummary = wbData.getSheet("ALL WEBs");
+		XSSFSheet sheetDatabase = wbData.getSheet("Database");
+		XSSFSheet sheetSummary = wbData.getSheet("All Webs");
 		Tech Tech = new Tech();
 
 //		String [] Categories= {"SSL certificates","Advertising","Email Hosting Providers"};

@@ -21,11 +21,11 @@ public class Program {
 			throws IOException, InvalidFormatException {
 		long start = System.currentTimeMillis();
 
-		String sheetDatabase = "DATABASE";
+		String sheetDatabase = "Database";
 		String sheetNewTech = "NewTech Each Web";
 		String sheetTechBWName = "Tech BW Name";
-		String sheetCurrentTechSummary = "All WEBs(Current)";
-		String sheetAllTech = "All Webs(Current & Historical)";
+		String sheetCurrentTechSummary = "All Webs (Current)";
+		String sheetAllTech = "All Webs (Current & Historical)";
 
 		// fixed parameters
 		int totalNumDomain = urls.length;
