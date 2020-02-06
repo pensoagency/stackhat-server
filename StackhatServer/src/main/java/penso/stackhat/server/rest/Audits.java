@@ -168,7 +168,7 @@ public class Audits {
                                 StandardCopyOption.REPLACE_EXISTING);
 
                         Program program = new Program();
-                        program.start(this.parameter.urls, pathDestination, pathDatabase, APIKey);
+                        program.start(this.parameter.urls, this.parameter.log, pathDestination, pathDatabase, APIKey);
 
                         // write success
                         this.parameter.setIsReady(true);
@@ -197,6 +197,7 @@ public class Audits {
         json.put("isReady", result.isReady);
         json.put("isError", result.isError);
         json.put("created", result.created);
+        json.put("log", result.log);
 
         try {
             try (FileWriter fileResultWriter = new FileWriter(Program.pathAuditsBase + result.id + ".json", false)) {

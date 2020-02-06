@@ -1,6 +1,7 @@
 package penso.stackhat.builtwith;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class BuiltWithLauncher {
 
@@ -107,7 +108,8 @@ public class BuiltWithLauncher {
 		String APIKey = "c8fb6490-26a8-46bd-88a9-ac26d7994656"; // API
 
 		Program program = new Program();
-		program.start(args, path, pathDatabase, APIKey);
+		ArrayList<String> log = new ArrayList<String>();
+		program.start(args, log, path, pathDatabase, APIKey);
 	}
 
 }
